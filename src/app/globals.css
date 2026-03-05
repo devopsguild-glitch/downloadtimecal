@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+  /* Override transition on interactive elements to avoid sluggish feel */
+  input, select, button, a {
+    transition-duration: 100ms;
+  }
+}
