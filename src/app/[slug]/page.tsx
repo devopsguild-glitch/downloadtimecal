@@ -1,4 +1,4 @@
-import { getPageBySlug, getAllPageSlugs, buildMetadata } from "@/lib/wordpress";
+import { getPageBySlug, getAllPageSlugs, getPageSeo, buildMetadata } from "@/lib/wordpress";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -10,32 +10,31 @@ export async function generateStaticParams() {
 }
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const page = await getPageBySlug(params.slug);
+  const { slug } = await params;
+  const [page, seo] = await Promise.all([getPageBySlug(slug), getPageSeo(slug)]);
   if (!page) return {};
   const fallbackDesc = page.excerpt?.replace(/<[^>]+>/g, "").slice(0, 160) ?? "";
-  return buildMetadata(page.seo, { title: page.title, description: fallbackDesc });
+  return buildMetadata(seo, { title: page.title, description: fallbackDesc });
 }
 
 export default async function WordPressPage({ params }: PageProps) {
-  const page = await getPageBySlug(params.slug);
+  const { slug } = await params;
+  const [page, seo] = await Promise.all([getPageBySlug(slug), getPageSeo(slug)]);
   if (!page) notFound();
 
   return (
     <>
-      {page.seo?.jsonLd?.raw && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: page.seo.jsonLd.raw }}
-        />
+      {seo?.jsonLd?.raw && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: seo.jsonLd.raw }} />
       )}
-      <article className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-10">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">{page.title}</h1>
+      <article className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 sm:p-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-8">{page.title}</h1>
         <div
-          className="prose prose-gray max-w-none text-gray-700 leading-relaxed"
+          className="prose prose-gray dark:prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: page.content }}
         />
       </article>

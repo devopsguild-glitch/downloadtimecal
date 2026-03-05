@@ -2,26 +2,15 @@ import type { Post, Category, WPPage, RankMathSEO } from "@/types/wordpress";
 
 const WP_API_URL = process.env.WP_API_URL as string;
 
-// RankMath SEO fragment — requires RankMath plugin + WPGraphQL for RankMath SEO
-const SEO_FRAGMENT = `
-  seo {
-    title
-    description
-    robots
-    canonicalUrl
-    openGraph {
-      title
-      description
-      image { sourceUrl }
-    }
-    jsonLd { raw }
-  }
-`;
-
 interface FetchOptions {
   query: string;
   variables?: Record<string, unknown>;
   revalidate?: number;
+}
+
+interface GqlResponse<T> {
+  data?: T;
+  errors?: { message: string }[];
 }
 
 export async function fetchWordPress<T>({
@@ -36,11 +25,17 @@ export async function fetchWordPress<T>({
     next: { revalidate },
   });
 
-  if (!res.ok) {
-    throw new Error(`WordPress API error: ${res.status}`);
+  if (!res.ok) throw new Error(`WordPress API error: ${res.status}`);
+
+  const json: GqlResponse<T> = await res.json();
+
+  if (!json.data) {
+    throw new Error(
+      json.errors?.map((e) => e.message).join(", ") ?? "Empty GraphQL response"
+    );
   }
 
-  return res.json() as Promise<T>;
+  return json.data;
 }
 
 // ─── Posts ────────────────────────────────────────────────────────────────────
@@ -49,15 +44,12 @@ export async function getPosts(): Promise<Post[]> {
   const query = `
     query GetPosts {
       posts(first: 10) {
-        nodes {
-          title slug excerpt date
-          categories { nodes { name slug } }
-        }
+        nodes { title slug excerpt date categories { nodes { name slug } } }
       }
     }
   `;
-  const data = await fetchWordPress<{ data: { posts: { nodes: Post[] } } }>({ query });
-  return data.data.posts.nodes;
+  const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query });
+  return data.posts.nodes;
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
@@ -66,15 +58,11 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       post(id: $slug, idType: SLUG) {
         title slug content date
         categories { nodes { name slug } }
-        ${SEO_FRAGMENT}
       }
     }
   `;
-  const data = await fetchWordPress<{ data: { post: Post | null } }>({
-    query,
-    variables: { slug },
-  });
-  return data.data.post;
+  const data = await fetchWordPress<{ post: Post | null }>({ query, variables: { slug } });
+  return data.post;
 }
 
 export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
@@ -83,8 +71,8 @@ export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
       posts(first: 100) { nodes { slug } }
     }
   `;
-  const data = await fetchWordPress<{ data: { posts: { nodes: { slug: string }[] } } }>({ query });
-  return data.data.posts.nodes;
+  const data = await fetchWordPress<{ posts: { nodes: { slug: string }[] } }>({ query });
+  return data.posts.nodes;
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -97,42 +85,30 @@ export async function getCategories(): Promise<Category[]> {
       }
     }
   `;
-  const data = await fetchWordPress<{ data: { categories: { nodes: Category[] } } }>({ query });
-  return data.data.categories.nodes;
+  const data = await fetchWordPress<{ categories: { nodes: Category[] } }>({ query });
+  return data.categories.nodes;
+}
+
+export async function getCategoryBySlug(slug: string): Promise<Category | null> {
+  const query = `
+    query GetCategory($slug: ID!) {
+      category(id: $slug, idType: SLUG) { name slug count }
+    }
+  `;
+  const data = await fetchWordPress<{ category: Category | null }>({ query, variables: { slug } });
+  return data.category;
 }
 
 export async function getPostsByCategory(slug: string): Promise<Post[]> {
   const query = `
     query PostsByCategory($slug: String!) {
       posts(first: 20, where: { categoryName: $slug }) {
-        nodes {
-          title slug excerpt date
-          categories { nodes { name slug } }
-        }
+        nodes { title slug excerpt date categories { nodes { name slug } } }
       }
     }
   `;
-  const data = await fetchWordPress<{ data: { posts: { nodes: Post[] } } }>({
-    query,
-    variables: { slug },
-  });
-  return data.data.posts.nodes;
-}
-
-export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  const query = `
-    query GetCategory($slug: ID!) {
-      category(id: $slug, idType: SLUG) {
-        name slug count
-        ${SEO_FRAGMENT}
-      }
-    }
-  `;
-  const data = await fetchWordPress<{ data: { category: Category | null } }>({
-    query,
-    variables: { slug },
-  });
-  return data.data.category;
+  const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query, variables: { slug } });
+  return data.posts.nodes;
 }
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
@@ -140,17 +116,11 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 export async function getPageBySlug(slug: string): Promise<WPPage | null> {
   const query = `
     query PageBySlug($slug: ID!) {
-      page(id: $slug, idType: SLUG) {
-        title slug content date excerpt
-        ${SEO_FRAGMENT}
-      }
+      page(id: $slug, idType: SLUG) { title slug content date excerpt }
     }
   `;
-  const data = await fetchWordPress<{ data: { page: WPPage | null } }>({
-    query,
-    variables: { slug },
-  });
-  return data.data.page;
+  const data = await fetchWordPress<{ page: WPPage | null }>({ query, variables: { slug } });
+  return data.page;
 }
 
 export async function getAllPageSlugs(): Promise<{ slug: string }[]> {
@@ -159,24 +129,71 @@ export async function getAllPageSlugs(): Promise<{ slug: string }[]> {
       pages(first: 100) { nodes { slug } }
     }
   `;
-  const data = await fetchWordPress<{ data: { pages: { nodes: { slug: string }[] } } }>({ query });
-  return data.data.pages.nodes;
+  const data = await fetchWordPress<{ pages: { nodes: { slug: string }[] } }>({ query });
+  return data.pages.nodes;
 }
 
-// ─── SEO helpers ─────────────────────────────────────────────────────────────
+// ─── RankMath SEO (optional — requires RankMath + WPGraphQL for RankMath SEO) ─
 
-export function buildMetadata(seo: RankMathSEO | undefined, fallback: { title: string; description?: string }) {
-  const title = seo?.title || fallback.title;
+const SEO_FIELDS = `
+  seo {
+    title description robots canonicalUrl
+    openGraph { title description image { sourceUrl } }
+    jsonLd { raw }
+  }
+`;
+
+async function fetchSeo(
+  type: "post" | "page" | "category",
+  slug: string
+): Promise<RankMathSEO | null> {
+  const idType = type === "category" ? "SLUG" : "SLUG";
+  const field = type === "post"
+    ? `post(id: $slug, idType: SLUG)`
+    : type === "page"
+    ? `page(id: $slug, idType: SLUG)`
+    : `category(id: $slug, idType: SLUG)`;
+
+  const query = `
+    query GetSeo($slug: ID!) {
+      ${field} { ${SEO_FIELDS} }
+    }
+  `;
+
+  try {
+    const data = await fetchWordPress<Record<string, { seo?: RankMathSEO } | null>>({
+      query,
+      variables: { slug },
+    });
+    const node = data[type];
+    return node?.seo ?? null;
+  } catch {
+    // RankMath WPGraphQL not active — degrade gracefully
+    return null;
+  }
+}
+
+export const getPostSeo      = (slug: string) => fetchSeo("post",     slug);
+export const getPageSeo      = (slug: string) => fetchSeo("page",     slug);
+export const getCategorySeo  = (slug: string) => fetchSeo("category", slug);
+
+// ─── Metadata helper ─────────────────────────────────────────────────────────
+
+export function buildMetadata(
+  seo: RankMathSEO | null | undefined,
+  fallback: { title: string; description?: string }
+) {
+  const title       = seo?.title       || fallback.title;
   const description = seo?.description || fallback.description || "";
-  const ogImage = seo?.openGraph?.image?.sourceUrl;
+  const ogImage     = seo?.openGraph?.image?.sourceUrl;
 
   return {
     title,
     description,
-    robots: seo?.robots?.join(", "),
-    alternates: seo?.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    ...(seo?.robots   ? { robots: seo.robots.join(", ") }           : {}),
+    ...(seo?.canonicalUrl ? { alternates: { canonical: seo.canonicalUrl } } : {}),
     openGraph: {
-      title: seo?.openGraph?.title || title,
+      title:       seo?.openGraph?.title       || title,
       description: seo?.openGraph?.description || description,
       ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
