@@ -15,7 +15,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const [page, seo] = await Promise.all([getPageBySlug(slug), getPageSeo(slug)]);
+  const [page, seo] = await Promise.all([getPageBySlug(slug).catch(() => null), getPageSeo(slug)]);
   if (!page) return {};
   const fallbackDesc = page.excerpt?.replace(/<[^>]+>/g, "").slice(0, 160) ?? "";
   return buildMetadata(seo, { title: page.title, description: fallbackDesc });
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function WordPressPage({ params }: PageProps) {
   const { slug } = await params;
-  const [page, seo] = await Promise.all([getPageBySlug(slug), getPageSeo(slug)]);
+  const [page, seo] = await Promise.all([getPageBySlug(slug).catch(() => null), getPageSeo(slug)]);
   if (!page) notFound();
 
   return (

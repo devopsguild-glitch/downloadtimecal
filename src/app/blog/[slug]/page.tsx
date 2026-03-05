@@ -16,7 +16,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const [post, seo] = await Promise.all([getPostBySlug(slug), getPostSeo(slug)]);
+  const [post, seo] = await Promise.all([getPostBySlug(slug).catch(() => null), getPostSeo(slug)]);
   if (!post) return {};
   const fallbackDesc = post.excerpt?.replace(/<[^>]+>/g, "").slice(0, 160) ?? "";
   return buildMetadata(seo, { title: post.title, description: fallbackDesc });
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const [post, seo] = await Promise.all([getPostBySlug(slug), getPostSeo(slug)]);
+  const [post, seo] = await Promise.all([getPostBySlug(slug).catch(() => null), getPostSeo(slug)]);
   if (!post) notFound();
 
   const formatted = new Date(post.date).toLocaleDateString("en-US", {

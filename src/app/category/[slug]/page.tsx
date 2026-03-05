@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
   const [category, posts, seo] = await Promise.all([
-    getCategoryBySlug(slug),
-    getPostsByCategory(slug),
+    getCategoryBySlug(slug).catch(() => null),
+    getPostsByCategory(slug).catch(() => []),
     getCategorySeo(slug),
   ]);
 
