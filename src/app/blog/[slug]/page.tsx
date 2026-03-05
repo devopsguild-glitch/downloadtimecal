@@ -6,7 +6,7 @@ import Link from "next/link";
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const slugs = await getAllPostSlugs();
+  const slugs = await getAllPostSlugs().catch(() => []);
   return slugs.map(({ slug }) => ({ slug }));
 }
 

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const categories = await getCategories();
+  const categories = await getCategories().catch(() => []);
   return categories.map(({ slug }) => ({ slug }));
 }
 

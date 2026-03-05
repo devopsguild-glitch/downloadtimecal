@@ -1,147 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Internet Connection Speeds</title>
-<style>
-body{
-  font-family: Arial, sans-serif;
-  margin:40px;
-  line-height:1.6;
-}
-
-table{
-  border-collapse: collapse;
-  width: 85%;
-  margin-top:20px;
-}
-
-th, td{
-  border:1px solid #ccc;
-  padding:10px;
-  text-align:left;
-}
-
-th{
-  background:#f2f2f2;
-}
-</style>
-</head>
-
-<body>
-
-<p>
-Internet speeds have evolved dramatically over time, from early dial-up connections
-measured in kilobits per second to modern fiber and 5G connections capable of gigabit
-speeds. Because download speeds are typically measured in <strong>bits per second (bps)</strong>
-while file sizes are measured in <strong>bytes</strong>, converting between them requires
-remembering that <strong>1 byte = 8 bits</strong>. The table below shows approximate
-average speeds for different connection technologies and the estimated time it would
-take to download a <strong>1 GB file</strong> using each type of connection.
-</p>
-
-<table>
-<thead>
-<tr>
-<th>Connection Type</th>
-<th>Average Speed</th>
-<th>Download Time (1 GB File)</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>Dial-Up Modem (1990s)</td>
-<td>56 Kbps</td>
-<td>~40 hours</td>
-</tr>
-
-<tr>
-<td>ISDN</td>
-<td>128 Kbps</td>
-<td>~18 hours</td>
-</tr>
-
-<tr>
-<td>Satellite (Early)</td>
-<td>512 Kbps</td>
-<td>~4.5 hours</td>
-</tr>
-
-<tr>
-<td>ADSL</td>
-<td>8 Mbps</td>
-<td>~17 minutes</td>
-</tr>
-
-<tr>
-<td>VDSL</td>
-<td>25 Mbps</td>
-<td>~5 minutes 20 seconds</td>
-</tr>
-
-<tr>
-<td>Cable Internet</td>
-<td>100 Mbps</td>
-<td>~1 minute 20 seconds</td>
-</tr>
-
-<tr>
-<td>Wi-Fi (802.11g)</td>
-<td>54 Mbps</td>
-<td>~2 minutes 30 seconds</td>
-</tr>
-
-<tr>
-<td>Wi-Fi (802.11n)</td>
-<td>150 Mbps</td>
-<td>~53 seconds</td>
-</tr>
-
-<tr>
-<td>Wi-Fi (802.11ac)</td>
-<td>433 Mbps</td>
-<td>~18 seconds</td>
-</tr>
-
-<tr>
-<td>Wi-Fi 6 (802.11ax)</td>
-<td>1.2 Gbps</td>
-<td>~7 seconds</td>
-</tr>
-
-<tr>
-<td>3G Mobile</td>
-<td>2 Mbps</td>
-<td>~1 hour 7 minutes</td>
-</tr>
-
-<tr>
-<td>4G LTE</td>
-<td>20 Mbps</td>
-<td>~6 minutes 40 seconds</td>
-</tr>
-
-<tr>
-<td>5G Mobile</td>
-<td>1 Gbps</td>
-<td>~8 seconds</td>
-</tr>
-
-<tr>
-<td>Fiber (FTTH)</td>
-<td>1 Gbps</td>
-<td>~8 seconds</td>
-</tr>
-
-<tr>
-<td>High-End Fiber</td>
-<td>10 Gbps</td>
-<td>~0.8 seconds</td>
-</tr>
-</tbody>
-
-</table>
-
-</body>
-</html>
+Running build in Washington, D.C., USA (East) – iad1
+Build machine configuration: 2 cores, 8 GB
+Cloning github.com/devopsguild-glitch/downloadtimecal-app (Branch: main, Commit: a942d2e)
+Skipping build cache, deployment was triggered without cache.
+Cloning completed: 490.000ms
+Running "vercel build"
+Vercel CLI 50.27.1
+Installing dependencies...
+added 112 packages in 8s
+29 packages are looking for funding
+  run `npm fund` for details
+Detected Next.js version: 16.1.6
+Running "npm run build"
+> headless-wp-nextjs@0.1.0 build
+> next build
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry

@@ -1,6 +1,6 @@
 import type { Post, Category, WPPage, RankMathSEO } from "@/types/wordpress";
 
-const WP_API_URL = process.env.WP_API_URL as string;
+const WP_API_URL = process.env.WP_API_URL ?? "";
 
 interface FetchOptions {
   query: string;
@@ -18,6 +18,8 @@ export async function fetchWordPress<T>({
   variables = {},
   revalidate = 60,
 }: FetchOptions): Promise<T> {
+  if (!WP_API_URL) throw new Error("WP_API_URL environment variable is not set");
+
   const res = await fetch(WP_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -73,6 +75,26 @@ export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
   `;
   const data = await fetchWordPress<{ posts: { nodes: { slug: string }[] } }>({ query });
   return data.posts.nodes;
+}
+
+export async function getAllPostsForSitemap(): Promise<{ slug: string; date: string; modified: string }[]> {
+  const query = `
+    query GetAllPostsForSitemap {
+      posts(first: 100) { nodes { slug date modified } }
+    }
+  `;
+  const data = await fetchWordPress<{ posts: { nodes: { slug: string; date: string; modified: string }[] } }>({ query });
+  return data.posts.nodes;
+}
+
+export async function getAllPagesForSitemap(): Promise<{ slug: string; modified: string }[]> {
+  const query = `
+    query GetAllPagesForSitemap {
+      pages(first: 100) { nodes { slug modified } }
+    }
+  `;
+  const data = await fetchWordPress<{ pages: { nodes: { slug: string; modified: string }[] } }>({ query });
+  return data.pages.nodes;
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
