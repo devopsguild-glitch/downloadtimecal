@@ -50,8 +50,10 @@ export async function getPosts(): Promise<Post[]> {
       }
     }
   `;
-  const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query });
-  return data.posts.nodes;
+  try {
+    const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query });
+    return data.posts?.nodes ?? [];
+  } catch { return []; }
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
@@ -63,8 +65,10 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       }
     }
   `;
-  const data = await fetchWordPress<{ post: Post | null }>({ query, variables: { slug } });
-  return data.post;
+  try {
+    const data = await fetchWordPress<{ post: Post | null }>({ query, variables: { slug } });
+    return data.post ?? null;
+  } catch { return null; }
 }
 
 export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
@@ -73,8 +77,10 @@ export async function getAllPostSlugs(): Promise<{ slug: string }[]> {
       posts(first: 100) { nodes { slug } }
     }
   `;
-  const data = await fetchWordPress<{ posts: { nodes: { slug: string }[] } }>({ query });
-  return data.posts.nodes;
+  try {
+    const data = await fetchWordPress<{ posts: { nodes: { slug: string }[] } }>({ query });
+    return data.posts?.nodes ?? [];
+  } catch { return []; }
 }
 
 export async function getAllPostsForSitemap(): Promise<{ slug: string; date: string; modified: string }[]> {
@@ -83,8 +89,10 @@ export async function getAllPostsForSitemap(): Promise<{ slug: string; date: str
       posts(first: 100) { nodes { slug date modified } }
     }
   `;
-  const data = await fetchWordPress<{ posts: { nodes: { slug: string; date: string; modified: string }[] } }>({ query });
-  return data.posts.nodes;
+  try {
+    const data = await fetchWordPress<{ posts: { nodes: { slug: string; date: string; modified: string }[] } }>({ query });
+    return data.posts?.nodes ?? [];
+  } catch { return []; }
 }
 
 export async function getAllPagesForSitemap(): Promise<{ slug: string; modified: string }[]> {
@@ -93,8 +101,10 @@ export async function getAllPagesForSitemap(): Promise<{ slug: string; modified:
       pages(first: 100) { nodes { slug modified } }
     }
   `;
-  const data = await fetchWordPress<{ pages: { nodes: { slug: string; modified: string }[] } }>({ query });
-  return data.pages.nodes;
+  try {
+    const data = await fetchWordPress<{ pages: { nodes: { slug: string; modified: string }[] } }>({ query });
+    return data.pages?.nodes ?? [];
+  } catch { return []; }
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -107,8 +117,10 @@ export async function getCategories(): Promise<Category[]> {
       }
     }
   `;
-  const data = await fetchWordPress<{ categories: { nodes: Category[] } }>({ query });
-  return data.categories.nodes;
+  try {
+    const data = await fetchWordPress<{ categories: { nodes: Category[] } }>({ query });
+    return data.categories?.nodes ?? [];
+  } catch { return []; }
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
@@ -117,8 +129,10 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
       category(id: $slug, idType: SLUG) { name slug count }
     }
   `;
-  const data = await fetchWordPress<{ category: Category | null }>({ query, variables: { slug } });
-  return data.category;
+  try {
+    const data = await fetchWordPress<{ category: Category | null }>({ query, variables: { slug } });
+    return data.category ?? null;
+  } catch { return null; }
 }
 
 export async function getPostsByCategory(slug: string): Promise<Post[]> {
@@ -129,8 +143,10 @@ export async function getPostsByCategory(slug: string): Promise<Post[]> {
       }
     }
   `;
-  const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query, variables: { slug } });
-  return data.posts.nodes;
+  try {
+    const data = await fetchWordPress<{ posts: { nodes: Post[] } }>({ query, variables: { slug } });
+    return data.posts?.nodes ?? [];
+  } catch { return []; }
 }
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
@@ -141,8 +157,10 @@ export async function getPageBySlug(slug: string): Promise<WPPage | null> {
       page(id: $slug, idType: SLUG) { title slug content date excerpt }
     }
   `;
-  const data = await fetchWordPress<{ page: WPPage | null }>({ query, variables: { slug } });
-  return data.page;
+  try {
+    const data = await fetchWordPress<{ page: WPPage | null }>({ query, variables: { slug } });
+    return data.page ?? null;
+  } catch { return null; }
 }
 
 export async function getAllPageSlugs(): Promise<{ slug: string }[]> {
@@ -151,8 +169,10 @@ export async function getAllPageSlugs(): Promise<{ slug: string }[]> {
       pages(first: 100) { nodes { slug } }
     }
   `;
-  const data = await fetchWordPress<{ pages: { nodes: { slug: string }[] } }>({ query });
-  return data.pages.nodes;
+  try {
+    const data = await fetchWordPress<{ pages: { nodes: { slug: string }[] } }>({ query });
+    return data.pages?.nodes ?? [];
+  } catch { return []; }
 }
 
 // ─── RankMath SEO (optional — requires RankMath + WPGraphQL for RankMath SEO) ─
