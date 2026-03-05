@@ -1,16 +1,10 @@
-import { getPostsByCategory, getCategoryBySlug, getCategories, getCategorySeo, buildMetadata } from "@/lib/wordpress";
+import { getPostsByCategory, getCategoryBySlug, getCategorySeo, buildMetadata } from "@/lib/wordpress";
 import BlogCard from "@/components/BlogCard";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const categories = await getCategories().catch(() => []);
-  return categories
-    .filter(({ slug }) => slug !== "uncategorized")
-    .map(({ slug }) => ({ slug }));
-}
+export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -18,7 +12,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const [category, seo] = await Promise.all([getCategoryBySlug(slug), getCategorySeo(slug)]);
+  const [category, seo] = await Promise.all([getCategoryBySlug(slug).catch(() => null), getCategorySeo(slug)]);
   if (!category) return {};
   return buildMetadata(seo, {
     title: `${category.name} — Blog`,
