@@ -7,7 +7,9 @@ export const revalidate = 60;
 
 export async function generateStaticParams() {
   const categories = await getCategories().catch(() => []);
-  return categories.map(({ slug }) => ({ slug }));
+  return categories
+    .filter(({ slug }) => slug !== "uncategorized")
+    .map(({ slug }) => ({ slug }));
 }
 
 interface PageProps {
